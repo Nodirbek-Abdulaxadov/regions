@@ -72,62 +72,6 @@ async fn handle_uz_kr_request(_req: Request<Body>) -> Result<Response<Body>, Inf
         .unwrap())
 }
 
-async fn handle_ru_request(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
-    // Read the file content as bytes
-    let file_content = match tokio::fs::read("regions_ru.json").await {
-        Ok(content) => content,
-        Err(_) => {
-            let mut response = Response::new(Body::from("Failed to open file"));
-            *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-            return Ok(response);
-        }
-    };
-
-    // Convert bytes to UTF-8 string (assumes the file content is UTF-8 encoded)
-    let content_str = match String::from_utf8(file_content) {
-        Ok(content) => content,
-        Err(_) => {
-            let mut response = Response::new(Body::from("Failed to parse UTF-8"));
-            *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-            return Ok(response);
-        }
-    };
-
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json; charset=utf-8")
-        .body(Body::from(content_str))
-        .unwrap())
-}
-
-async fn handle_en_request(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
-    // Read the file content as bytes
-    let file_content = match tokio::fs::read("regions_en.json").await {
-        Ok(content) => content,
-        Err(_) => {
-            let mut response = Response::new(Body::from("Failed to open file"));
-            *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-            return Ok(response);
-        }
-    };
-
-    // Convert bytes to UTF-8 string (assumes the file content is UTF-8 encoded)
-    let content_str = match String::from_utf8(file_content) {
-        Ok(content) => content,
-        Err(_) => {
-            let mut response = Response::new(Body::from("Failed to parse UTF-8"));
-            *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-            return Ok(response);
-        }
-    };
-
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json; charset=utf-8")
-        .body(Body::from(content_str))
-        .unwrap())
-}
-
 async fn run_server() -> Result<(), hyper::Error> {
     let make_svc = make_service_fn(|_conn| {
         async {
@@ -136,8 +80,6 @@ async fn run_server() -> Result<(), hyper::Error> {
                     match (req.method(), req.uri().path()) {
                         (&hyper::Method::GET, "/uz_Uz") => handle_uz_uz_request(req).await,
                         (&hyper::Method::GET, "/uz_Kr") => handle_uz_kr_request(req).await,
-                        (&hyper::Method::GET, "/ru") => handle_ru_request(req).await,
-                        (&hyper::Method::GET, "/en") => handle_en_request(req).await,
                         _ => {
                             // Return a 404 Not Found response for unknown routes
                             let response = Response::builder()
